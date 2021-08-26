@@ -3,6 +3,7 @@
 .BIN_AR_param <- list(
   support = 0.1,
   confidence = 0.8,
+  minlen = 2,
   maxlen = 3,
   maxtime = 5,
   sort_measure = "confidence",
@@ -25,7 +26,7 @@ BIN_AR <- function(data, parameter = NULL) {
   rule_base <-  suppressWarnings(
     apriori(data,
     parameter=list(support=p$support, confidence=p$confidence,
-      minlen=2, maxlen=p$maxlen, maxtime=p$maxtime), control=p$apriori_control)
+      minlen=p$minlen, maxlen=p$maxlen, maxtime=p$maxtime), control=p$apriori_control)
     )
 
   ## additional measures for sorting the rulebase
