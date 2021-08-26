@@ -70,15 +70,40 @@ BIN_RANDOM <- function(data=NULL, parameter=NULL) {
 
     if(ncol(newdata) != length(model$labels)) stop("number of items in newdata does not match model.")
 
-    ratings <- new("realRatingMatrix",
-      data = dropNA(matrix(runif(n = nrow(newdata)*ncol(newdata)),
-        nrow = nrow(newdata))),
-      normalize = NULL
-    )
-    rownames(ratings) <- rownames(newdata)
-    colnames(ratings) <- model$labels
-
-    returnRatings(ratings, newdata, type, n)
+    for(i in 1:nrow(newdata)) {
+      ratings_user <- new("realRatingMatrix",
+                     data = dropNA(matrix(runif(n = ncol(newdata)), nrow = 1)),
+                     normalize = NULL
+      )
+      
+      rownames(ratings_user) <- rownames(newdata[i,])
+      colnames(ratings_user) <- model$labels
+      
+      ratings_user <- as(returnRatings(ratings_user, newdata[i,], type, n),"dgCMatrix")
+      if (i==1){
+        ratings <- ratings_user
+      }else{
+        ratings <- rbind(ratings, ratings_user)
+      }
+    }
+    
+    ratings <- new("realRatingMatrix", data = ratings)
+    
+    if(type=="topNList")
+      ratings <- getTopNLists(ratings, n = n)
+      
+    ratings
+    
+    # # original code
+    # ratings <- new("realRatingMatrix",
+    #                data = dropNA(matrix(runif(n = nrow(newdata)*ncol(newdata)),
+    #                                     nrow = nrow(newdata))),
+    #                normalize = NULL
+    # )
+    # rownames(ratings) <- rownames(newdata)
+    # colnames(ratings) <- model$labels
+    # 
+    # returnRatings(ratings, newdata, type, n)
   }
 
   ## this recommender has no model
