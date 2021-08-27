@@ -75,11 +75,12 @@ BIN_RANDOM <- function(data=NULL, parameter=NULL) {
                      data = dropNA(matrix(runif(n = ncol(newdata)), nrow = 1)),
                      normalize = NULL
       )
+      data_user <- newdata[i,]
       
-      rownames(ratings_user) <- rownames(newdata[i,])
+      rownames(ratings_user) <- rownames(data_user)
       colnames(ratings_user) <- model$labels
       
-      ratings_user <- as(returnRatings(ratings_user, newdata[i,], type, n),"dgCMatrix")
+      ratings_user <- as(returnRatings(ratings_user, data_user, type, n), "dgCMatrix")
       if (i==1){
         ratings <- ratings_user
       }else{
@@ -87,23 +88,13 @@ BIN_RANDOM <- function(data=NULL, parameter=NULL) {
       }
     }
     
-    ratings <- new("realRatingMatrix", data = ratings)
+    ratings <- as(ratings, "realRatingMatrix")
     
     if(type=="topNList")
       ratings <- getTopNLists(ratings, n = n)
       
     ratings
     
-    # # original code
-    # ratings <- new("realRatingMatrix",
-    #                data = dropNA(matrix(runif(n = nrow(newdata)*ncol(newdata)),
-    #                                     nrow = nrow(newdata))),
-    #                normalize = NULL
-    # )
-    # rownames(ratings) <- rownames(newdata)
-    # colnames(ratings) <- model$labels
-    # 
-    # returnRatings(ratings, newdata, type, n)
   }
 
   ## this recommender has no model
