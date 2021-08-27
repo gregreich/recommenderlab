@@ -15,7 +15,8 @@ BIN_POPULAR <- function(data, parameter = NULL) {
 
   model <- list(
     topN = topN,
-    ratings = ratings
+    ratings = ratings,
+    labels = colnames(data)
   )
 
   predict <- function(model, newdata, n=10,
@@ -29,13 +30,32 @@ BIN_POPULAR <- function(data, parameter = NULL) {
       newdata <- data[newdata,]
     }
 
-    ## replicate the ratings for each user
-    ratings <- as(t(replicate(nrow(newdata), as(model$ratings, "matrix"),
-      simplify = TRUE)), "realRatingMatrix")
-    dimnames(ratings) <- dimnames(newdata)
-
-    ### we could do the topNlist faster!
-    returnRatings(ratings, newdata, type, n)
+    ratings_pop <- model$ratings
+    colnames(ratings_pop) <- model$labels
+    
+    for(i in 1:nrow(newdata)) {
+      
+      data_user <- newdata[i,]
+      rownames(ratings_pop) <- rownames(data_user)
+      
+      ratings_user <- as(returnRatings(ratings_pop, data_user, type, n), "dgCMatrix")
+    
+      if (i==1){
+        ratings <- ratings_user
+      }else{
+        ratings <- rbind(ratings, ratings_user)
+      }
+    }
+    
+    ratings <- as(ratings, "realRatingMatrix")
+    rownames(ratings) <- rownames(newdata)
+    colnames(ratings) <- model$labels
+    
+    if(type=="topNList")
+      ratings <- getTopNLists(ratings, n = n)
+    
+    ratings
+    
   }
 
   ## construct recommender object

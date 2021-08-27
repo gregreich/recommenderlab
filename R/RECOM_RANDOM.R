@@ -89,6 +89,8 @@ BIN_RANDOM <- function(data=NULL, parameter=NULL) {
     }
     
     ratings <- as(ratings, "realRatingMatrix")
+    rownames(ratings) <- rownames(newdata)
+    colnames(ratings) <- model$labels
     
     if(type=="topNList")
       ratings <- getTopNLists(ratings, n = n)
