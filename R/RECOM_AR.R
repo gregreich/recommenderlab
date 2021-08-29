@@ -69,19 +69,19 @@ BIN_AR <- function(data, parameter = NULL) {
     reclist <- list()
     for(i in 1:nrow(newdata)) {
       recom <- unique(unlist(
-        LIST(rhs(sort(model$rule_base[m[,i]], by=sort_measure)),
+        LIST(rhs(sort(model$rule_base[m[,i]], by = sort_measure)),
           decode=FALSE)))
 
       reclist[[i]] <- if(!is.null(recom)) recom else integer(0)
     }
 
     names(reclist) <- rownames(newdata)
-    
-    reclist <- new("topNList", items = reclist, itemLabels = colnames(newdata), n = ncol(newdata))
-    ratings = new("realRatingMatrix", data = as(reclist, "dgCMatrix"))
-    
-    returnRatings(ratings, newdata, type, n)
-    
+    # create ratings that reflect the order of the topNlist
+    ratings <- lapply(reclist, FUN = function(x) seq(1, 0, along.with = x))
+    topN <- new("topNList", items = reclist, ratings = ratings,
+      itemLabels = colnames(newdata), n = ncol(newdata))
+
+    returnRatings(topN, newdata, type, n)
   }
 
   ## construct recommender object

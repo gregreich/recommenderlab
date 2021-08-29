@@ -20,6 +20,12 @@ setAs("topNList", "dgCMatrix",
 setAs("topNList", "ngCMatrix",
   function(from) as(as(from, "dgCMatrix"), "ngCMatrix"))
 
+setAs("topNList", "realRatingMatrix",
+  function(from) {
+    new("realRatingMatrix", data = as(from, "dgCMatrix"))
+  }
+)
+
 setAs("topNList", "matrix",
   function(from) dropNA2matrix(as(from, "dgCMatrix")))
 
@@ -28,10 +34,25 @@ setMethod("getList", signature(from = "topNList"),
     if(decode) lapply(from@items, function(y) from@itemLabels[y])
   else from@items)
 
-setMethod("getRatings", signature(x = "topNList"),
-  function(x, ...) x@ratings)
-
 setAs("topNList", "list", function(from) getList(from, decode = TRUE))
+
+setMethod("c", signature(x = "topNList"),
+  function(x, ..., recursive = FALSE){
+    args <- list(...)
+    if (recursive)
+      args <- unlist(args)
+    for (y in args) {
+      if (!is(y, "topNList"))
+        stop("can only combine objects of class topNList")
+      if (!identical(x@itemLabels, y@itemLabels))
+        stop("topNlists are not compatible (item labels do not match).")
+      x@items <- c(x@items, y@items)
+      x@ratings <- c(x@ratings, y@ratings)
+    }
+    x
+  }
+)
+
 
 ## creation from realRatingMatrix
 setMethod("getTopNLists", signature(x = "realRatingMatrix"),
