@@ -96,11 +96,18 @@ setMethod("removeKnownRatings", signature(x = "realRatingMatrix"),
     if(nrow(x) != nrow(known))
       stop("removeKnownRatings: Number of rows in x and known do not match!")
 
-    ## FIXME: make sparse
-    xm <- as(x, "matrix")
-    xm[as(as(known,"ngCMatrix"), "matrix")] <- NA
-    x@data <- dropNA(xm)
-    x
+    ## FIXME: make sparse (and remove loop)
+  	for(i in 1:nrow(x)){
+  	  xm <- as(x[i,], "matrix")
+  	  xm[as(as(known[i,],"ngCMatrix"), "matrix")] <- NA
+  	  if (i==1){
+  	    x_ <- dropNA(xm)
+  	  }else{
+  	    x_ <- rbind(x_, dropNA(xm))
+  	  }
+  	}
+  	x@data <- x_
+  	x
   })
 
 
