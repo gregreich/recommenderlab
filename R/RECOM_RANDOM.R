@@ -27,14 +27,28 @@ RANDOM <- function(data = NULL, parameter = NULL) {
 
     if(ncol(newdata) != length(model$labels)) stop("number of items in newdata does not match model.")
 
-    ratings <- new("realRatingMatrix",
-      data = dropNA(matrix(runif(n = nrow(newdata)*ncol(newdata),
-        min = model$range[1], max = model$range[2]),
-        nrow = nrow(newdata),
-        dimnames=list(rownames(newdata), model$labels))),
-      normalize = NULL
-    )
-
+    for(i in 1:nrow(newdata)) {
+      data_user <- newdata[i,]
+      ratings_user <- new("realRatingMatrix",
+        data = dropNA(matrix(runif(n = ncol(newdata),
+          min = model$range[1], max = model$range[2]),
+          nrow = 1, 
+          dimnames=list(rownames(data_user), model$labels))),
+        normalize = NULL
+      )
+      
+      ratings_user <- as(returnRatings(ratings_user, data_user, type, n), "dgCMatrix")
+      if (i==1){
+        ratings <- ratings_user
+      }else{
+        ratings <- rbind(ratings, ratings_user)
+      }
+    }
+    
+    ratings <- as(ratings, "realRatingMatrix")
+    rownames(ratings) <- rownames(newdata)
+    colnames(ratings) <- model$labels
+    
     returnRatings(ratings, newdata, type, n)
   }
 
