@@ -35,29 +35,42 @@ HybridRecommender <- function(..., weights = NULL, aggregation_type = "sum") {
     #if(ncol(newdata) != length(model$labels)) stop("number of items in newdata does not match model.")
 
     pred <- lapply(model$recommenders, FUN = function(object)
-      object@predict(object@model, newdata, data=data, type="ratings", ...))
+      returnRatings(
+        object@predict(object@model, newdata, n=n, data=data, type=type,  ...),
+        newdata, "ratings", n))
 
-    ratings <- matrix(NA, nrow=nrow(newdata), ncol = ncol(newdata))
     for(i in 1:nrow(pred[[1]])) {
       ### Ignore NAs!
-      ratings[i,] <-
-        aggregation_fun(t(sapply(pred, FUN = function(p)
-          as(p[i,], "matrix"))) * model$weights, na.rm = TRUE)
+      data_user <- newdata[i,]
+      ratings_user <-
+        matrix(aggregation_fun(t(sapply(pred, FUN = function(p)
+            as(p[i,], "matrix"))) * model$weights, na.rm = TRUE), 
+          nrow = 1,
+          dimnames=dimnames(data_user)
+        )
       
       normalizer <- colSums(t(sapply(pred, FUN = function(p)
         !is.na(as(p[i,], "matrix")))) * model$weights, na.rm = TRUE)
       if(aggregation_type == "max" || aggregation_type == "min"){
         normalizer <- (normalizer > 0) * 1
       }
-      ratings[i,] <- ratings[i,] / normalizer
+      ratings_user <- ratings_user / normalizer
+      ratings_user[!is.finite(ratings_user)] <- NA
+      
+      ratings_user <- new("realRatingMatrix",
+        data = dropNA(ratings_user), normalize = NULL)
+      
+      ratings_user <- as(returnRatings(ratings_user, data_user, type, n), "dgCMatrix")
+      if (i==1){
+        ratings <- ratings_user
+      }else{
+        ratings <- rbind(ratings, ratings_user)
+      }
     }
-    ratings[!is.finite(ratings)] <- NA
-
-    dimnames(ratings) <- dimnames(newdata)
-
+    
     ratings <- as(ratings, "realRatingMatrix")
-    colnames(ratings) <- colnames(newdata)
-
+    dimnames(ratings) <- dimnames(newdata)
+    
     if(type == "ratingMatrix")
       stop("Hybrid cannot predict a complete ratingMatrix!")
 
