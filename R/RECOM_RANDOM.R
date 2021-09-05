@@ -3,7 +3,7 @@
 RANDOM <- function(data = NULL, parameter = NULL) {
 
   model <- list(
-    range = range(getRatings(data), na.rm = TRUE),
+    range = NA,
     labels = colnames(data)
   )
 
