@@ -15,6 +15,9 @@ setGeneric("getRatings",
 setGeneric("getNormalize",
 	function(x, ...) standardGeneric("getNormalize"))
 
+setGeneric("getSummary",
+  function(object, ...) standardGeneric("getSummary"))
+
 setGeneric("getRatingMatrix",
 	function(x, ...) standardGeneric("getRatingMatrix"))
 

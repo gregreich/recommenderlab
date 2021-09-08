@@ -134,3 +134,19 @@ setMethod("show", signature(object = "evaluationScheme"),
     show(object@data)
     invisible(NULL)
   })
+
+setMethod("getSummary", signature(object = "evaluationScheme"),
+          function(object) {
+            n_user_train <- nrow(getData(object,"train"))
+            n_user_test  <- nrow(getData(object,"unknown"))
+            list(
+              "method" = object@method,
+              "train" = object@train,
+              "k" = object@k,
+              "given" = object@given,
+              "goodRating" = object@goodRating,
+              "n_user_train" = n_user_train,
+              "n_user_test" = n_user_test,
+              "n_user" = n_user_train+n_user_test
+            )
+          })

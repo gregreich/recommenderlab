@@ -95,6 +95,7 @@ exportMethods(
   "getRuns",
   "getModel",
   "getData",
+  "getSummary",
   "getConfusionMatrix",
   "getResults",
   "getTopNLists",
