@@ -160,7 +160,12 @@ setMethod("evaluate", signature(x = "evaluationScheme", method = "list"),
       cm = res,
       model =
         if (keepModel)
-          rec
-      else
-        NULL)
+            rec
+        else{
+          if(rec@method=="AR") 
+            summary(rec@model$rule_base)
+          else
+            NULL
+        }
+      )
   }

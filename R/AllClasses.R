@@ -15,7 +15,7 @@ setClass("Recommender",
 	)
 )
 
-setClassUnion("RecommenderOrNull", c("Recommender", "NULL"))
+setClassUnion("RecommenderOrNull", c("Recommender", "NULL", "summary.rules"))
 
 ## Ratings
 setClass("ratingMatrix",
